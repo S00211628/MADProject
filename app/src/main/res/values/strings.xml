@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">MADProject1</string>
+    
+    <string-array name="colours">
+        <item>Black</item>
+        <item>Brown</item>
+        <item>Red</item>
+        <item>Orange</item>
+        <item>Yellow</item>
+        <item>Green</item>
+        <item>Blue</item>
+        <item>Violet</item>
+        <item>Grey</item>
+        <item>White</item>
+        <item>Gold</item>
+        <item>Silver</item>
+    </string-array>
+
+    <string name="Colour_Codes">
+        <item>#FF000000</item>
+        <item>#A52A2A</item>
+        <item>#FF0000</item>
+        <item>#D18700</item>
+        <item>#FFFF00</item>
+        <item>#008000</item>
+        <item>#0000FF</item>
+        <item>#8F00FF</item>
+        <item>#808080</item>
+        <item>#FFFFFF</item>
+        <item>#FFFF00</item>
+        <item>#C0C0C0</item>
+    </string>
+</resources>
