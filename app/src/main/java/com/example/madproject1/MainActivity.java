@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,10 +41,9 @@ public class MainActivity extends AppCompatActivity {
     View BandThree;
     View BandFour;
 
-    Button btnconfm;
     Boolean somethingChoosen = false;
 
-   List<Integer> Numbers;
+    ArrayList Resistor_Numbers = new ArrayList();
 
     int stage = 0;
 
@@ -70,25 +70,18 @@ public class MainActivity extends AppCompatActivity {
         BandThree = findViewById(R.id.BandThree);
         BandFour = findViewById(R.id.BandFour);
 
-        btnconfm = findViewById(R.id.btnConfim);
 
         tvYourResult = findViewById(R.id.tvYourResult);
         tvResultContainer = findViewById(R.id.tvResultContainer);
-
-
-
-        tvWhatColour.setText("What Colour is Band " + (stage + 1) + "?");
-
-
-
-
-
     }
     @Override
     public void onResume(){
         super.onResume();
-        ChooseColour();
-
+        if (stage == 0)
+        {
+            ChooseColour();
+            tvWhatColour.setText("What Colour is Band " + (stage + 1) + "?");
+        }
     }
 
 
@@ -110,51 +103,59 @@ public class MainActivity extends AppCompatActivity {
         String[] Tolerance_Colours = getResources().getStringArray(R.array.Tolerance_Colours);
         String[] Tolerance_Values = getResources().getStringArray(R.array.Tolerance_Values);
 
-        ArrayAdapter<String> itemAdapter = new ArrayAdapter<>(MainActivity.this, R.layout.drop_down_item, Band_Colours);
-        autoCompleteTextView.setAdapter(itemAdapter);
-        autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                Titles[stage].setText((String) Band_Colours[position]);
-                Bands[stage].setBackgroundColor(Color.parseColor(Band_Hex_Codes[position]));
-                somethingChoosen = true;
-                Log.e("", Integer.toString(stage));
-            }
-        });
-
-        if (stage >= 1) {
-
-            ArrayAdapter<String> itemAdapter1 = new ArrayAdapter<>(MainActivity.this, R.layout.drop_down_item, Multiplier_Colours);
+        if (stage<1){
+            ArrayAdapter<String> itemAdapter1 = new ArrayAdapter<>(MainActivity.this, R.layout.drop_down_item, Band_Colours);
+            autoCompleteTextView.setAdapter(null);
             autoCompleteTextView.setAdapter(itemAdapter1);
+            autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                        Titles[stage].setText((String) Band_Colours[position]);
+                        Bands[stage].setBackgroundColor(Color.parseColor(Band_Hex_Codes[position]));
+                        Resistor_Numbers.add(Integer.parseInt(Band_Values[position]));
+                        somethingChoosen = true;
+                    GoToNextStage(autoCompleteTextView);
+                }
+            });
+
+        } else if (stage >= 2){
+            ArrayAdapter<String> itemAdapter2 = new ArrayAdapter<>(MainActivity.this, R.layout.drop_down_item, Multiplier_Colours);
+            autoCompleteTextView.setAdapter(null);
+            autoCompleteTextView.setAdapter(itemAdapter2);
             autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                     Titles[stage].setText((String) Multiplier_Colours[position]);
                     Bands[stage].setBackgroundColor(Color.parseColor(Multiplier_Hex_Codes[position]));
+                    Resistor_Numbers.add(Integer.parseInt(Multiplier_Values[position]));
                     somethingChoosen = true;
-                    Log.e("","here");
+                    GoToNextStage(autoCompleteTextView);
                 }
             });
-        }
-        if (stage > 2) {
+        } else if(stage > 2){
             ArrayAdapter<String> itemAdapter3 = new ArrayAdapter<>(MainActivity.this, R.layout.drop_down_item, Tolerance_Colours);
+            autoCompleteTextView.setAdapter(null);
             autoCompleteTextView.setAdapter(itemAdapter3);
             autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                    Titles[stage].setText((String) Tolerance_Colours[position]);
-                    Bands[stage].setBackgroundColor(Color.parseColor(Tolerance_Hex_Codes[position]));
-                    somethingChoosen = true;
+                        Titles[stage].setText((String) Tolerance_Colours[position]);
+                        Bands[stage].setBackgroundColor(Color.parseColor(Tolerance_Hex_Codes[position]));
+                        Resistor_Numbers.add(Integer.parseInt(Tolerance_Values[position]));
+                        somethingChoosen = true;
+                        GoToNextStage(autoCompleteTextView);
                 }
             });
         }
     }
 
-    public void GoToNextStage(View view) {
 
-        if (somethingChoosen){
+    public void GoToNextStage(View view) {
+        if (somethingChoosen && stage <4){
             stage++;
             somethingChoosen = false;
+            ChooseColour();
+            tvWhatColour.setText("What Colour is Band " + (stage + 1) + "?");
         }
         else{
             Toast.makeText(MainActivity.this, "Please Choose a Colour", Toast.LENGTH_SHORT).show();
@@ -163,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
         if (stage == 4 ){
             DisplayResults();
         }
+
     }
 
 
@@ -170,21 +172,63 @@ public class MainActivity extends AppCompatActivity {
 
    public void DisplayResults(){
 
-//        calcNumber();
-       tvResultContainer.setText("52m Ohms at 5%");
 
-        btnconfm.setVisibility(View.GONE);
+        Integer Band_Number_Concat = 0;
+        Integer Answer_Concat = 0;
+        Integer Multiplier = 0;
+        Band_Number_Concat = concatenateDigits((Integer) Resistor_Numbers.get(0),(Integer) Resistor_Numbers.get(1));
+
+
+        // Check if the number is Black (which is no 0)
+       // then set answer to just concat band numbers
+       // Else add  zeros to the end.
+       if ((Integer)Resistor_Numbers.get(2) == 1) {
+            Answer_Concat = Band_Number_Concat;
+        }
+       if((Integer) Resistor_Numbers.get(2) == 9){
+           Answer_Concat = Answer_Concat/10;
+       }
+       if((Integer) Resistor_Numbers.get(2) == 99){
+           Answer_Concat = Answer_Concat/100;
+       }
+
+//       switch ((Integer)Resistor_Numbers.get(2)){
+//           case 1:
+//               Answer_Concat = Band_Number_Concat;
+//               break;
+//           case 9:
+//               Answer_Concat = Answer_Concat/10;
+//               break;
+//           case 99:
+//               Answer_Concat = Answer_Concat/100;
+//               break;
+//       }
+
+        Multiplier = (Integer) Resistor_Numbers.get(2);
+        Answer_Concat = concatenateDigits((Integer) Band_Number_Concat, (Integer) Multiplier);
+
+       Log.e("","=====================");
+       Log.e("Band Numbers", Band_Number_Concat.toString());
+       Log.e("Multiplier",Multiplier.toString());
+       Log.e("Rounded Answer",Answer_Concat.toString());
+       Log.e("","=====================");
+
+
+       tvResultContainer.setText(Answer_Concat.toString());
+
         textInputLayout.setVisibility(View.GONE);
         autoCompleteTextView.setVisibility(View.GONE);
         tvWhatColour.setVisibility(View.GONE);
 
         tvResultContainer.setVisibility(View.VISIBLE);
         tvYourResult.setVisibility(View.VISIBLE);
+       calcNumber();
    }
 
 
     public void TryAgain(View view) {
         stage = 0;
+        tvWhatColour.setText("What Colour is Band " + (stage + 1) + "?");
 
         tvColourOneTitle.setText("");
         tvColourTwoTitle.setText("");
@@ -195,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
         BandThree.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.emptyrectagle));
         BandFour.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.emptyrectagle));
 
-            btnconfm.setVisibility(View.VISIBLE);
             textInputLayout.setVisibility(View.VISIBLE);
             autoCompleteTextView.setVisibility  (View.VISIBLE);
             tvWhatColour.setVisibility(View.VISIBLE);
@@ -204,11 +247,15 @@ public class MainActivity extends AppCompatActivity {
             tvYourResult.setVisibility(View.GONE);
     }
 
-
-
-
-
     public void calcNumber(){
-        tvResultContainer.setText(Numbers.get(0));
+        Log.e("",Resistor_Numbers.toString());
+    }
+
+    public static Integer concatenateDigits(int... digits) {
+        StringBuilder sb = new StringBuilder(digits.length);
+        for (int digit : digits) {
+            sb.append(digit);
+        }
+        return Integer.parseInt(sb.toString());
     }
 }
