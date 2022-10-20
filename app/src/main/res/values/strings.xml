@@ -49,6 +49,8 @@
         <item>Green</item>
         <item>Blue</item>
         <item>Violet</item>
+        <item>Grey</item>
+        <item>White</item>
         <item>Gold</item>
         <item>Silver</item>
     </string-array>
@@ -58,10 +60,12 @@
         <item>0</item>
         <item>00</item>
         <item>000</item>
-        <item>0000</item>
-        <item>00000</item>
-        <item>000000</item>
-        <item>0000000</item>
+        <item>0,000</item>
+        <item>0,000,0</item>
+        <item>0,000,00</item>
+        <item>0,000,000</item>
+        <item>0,000,000,0</item>
+        <item>0,000,000,00</item>
         <item>9</item>
         <item>99</item>
     </string-array>
@@ -98,30 +102,25 @@
     </string-array>
 
     <string-array name="Tolerance_Hex_Codes">
-        <item>#FF000000</item>
         <item>#964B00</item>
         <item>#FF0000</item>
-        <item>#D18700</item>
         <item>#008000</item>
         <item>#0000FF</item>
         <item>#8F00FF</item>
         <item>#808080</item>
-        <item>#FFFFFF</item>
         <item>#FFFF00</item>
         <item>#C0C0C0</item>
     </string-array>
 
     <string-array name="Tolerance_Values">
-        <item>20</item>
         <item>1</item>
         <item>2</item>
-        <item>3</item>
         <item>.5</item>
         <item>.25</item>
-        <item>.10</item>
+        <item>.1</item>
         <item>.05</item>
-        <item>10</item>
         <item>5</item>
+        <item>10</item>
         <item>10</item>
     </string-array>
 

@@ -3,26 +3,25 @@ package com.example.madproject1;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import android.accessibilityservice.FingerprintGestureController;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
-
+    // Assigning all the Elements on the Screen to Variables.
     TextInputLayout textInputLayout;
     AutoCompleteTextView autoCompleteTextView;
 
@@ -41,9 +40,10 @@ public class MainActivity extends AppCompatActivity {
     View BandThree;
     View BandFour;
 
-    Boolean somethingChoosen = false;
+    Boolean somethingChosen = false;
 
     ArrayList Resistor_Numbers = new ArrayList();
+    // ============================================================
 
     int stage = 0;
 
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        // Linking Variables to their elements on the Main Activity.
         textInputLayout = findViewById(R.id.textInputLayout);
         autoCompleteTextView = findViewById(R.id.autoCompleteTV);
 
@@ -73,7 +73,11 @@ public class MainActivity extends AppCompatActivity {
 
         tvYourResult = findViewById(R.id.tvYourResult);
         tvResultContainer = findViewById(R.id.tvResultContainer);
+        // ============================================================
     }
+
+    // Call the ChooseColour Function so that the autocorrect
+    // doesn't break if you leave and come back to the app.
     @Override
     public void onResume(){
         super.onResume();
@@ -86,8 +90,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void ChooseColour(){
-
-
         TextView[] Titles = {tvColourOneTitle, tvColourTwoTitle, tvMultiplierTitle, tvToleranceTitle};
         View[] Bands = {BandOne, BandTwo, BandThree, BandFour};
 
@@ -103,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
         String[] Tolerance_Colours = getResources().getStringArray(R.array.Tolerance_Colours);
         String[] Tolerance_Values = getResources().getStringArray(R.array.Tolerance_Values);
 
+        Object[] list = {Band_Colours, Multiplier_Colours, Tolerance_Colours};
+
+
+
+
         if (stage<1){
             ArrayAdapter<String> itemAdapter1 = new ArrayAdapter<>(MainActivity.this, R.layout.drop_down_item, Band_Colours);
             autoCompleteTextView.setAdapter(null);
@@ -113,12 +120,12 @@ public class MainActivity extends AppCompatActivity {
                         Titles[stage].setText((String) Band_Colours[position]);
                         Bands[stage].setBackgroundColor(Color.parseColor(Band_Hex_Codes[position]));
                         Resistor_Numbers.add(Integer.parseInt(Band_Values[position]));
-                        somethingChoosen = true;
+                        somethingChosen = true;
                     GoToNextStage(autoCompleteTextView);
                 }
             });
 
-        } else if (stage >= 2){
+        } else if (stage == 2){
             ArrayAdapter<String> itemAdapter2 = new ArrayAdapter<>(MainActivity.this, R.layout.drop_down_item, Multiplier_Colours);
             autoCompleteTextView.setAdapter(null);
             autoCompleteTextView.setAdapter(itemAdapter2);
@@ -127,8 +134,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                     Titles[stage].setText((String) Multiplier_Colours[position]);
                     Bands[stage].setBackgroundColor(Color.parseColor(Multiplier_Hex_Codes[position]));
-                    Resistor_Numbers.add(Integer.parseInt(Multiplier_Values[position]));
-                    somethingChoosen = true;
+                    Resistor_Numbers.add(Multiplier_Values[position]);
+                    somethingChosen = true;
                     GoToNextStage(autoCompleteTextView);
                 }
             });
@@ -141,8 +148,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
                         Titles[stage].setText((String) Tolerance_Colours[position]);
                         Bands[stage].setBackgroundColor(Color.parseColor(Tolerance_Hex_Codes[position]));
-                        Resistor_Numbers.add(Integer.parseInt(Tolerance_Values[position]));
-                        somethingChoosen = true;
+                        Resistor_Numbers.add(Double.parseDouble(Tolerance_Values[position]));
+                        somethingChosen = true;
                         GoToNextStage(autoCompleteTextView);
                 }
             });
@@ -151,9 +158,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void GoToNextStage(View view) {
-        if (somethingChoosen && stage <4){
+        if (somethingChosen && stage <4){
             stage++;
-            somethingChoosen = false;
+            somethingChosen = false;
             ChooseColour();
             tvWhatColour.setText("What Colour is Band " + (stage + 1) + "?");
         }
@@ -163,66 +170,51 @@ public class MainActivity extends AppCompatActivity {
 
         if (stage == 4 ){
             DisplayResults();
+            Resistor_Numbers.clear();
+
         }
 
     }
 
-
-
-
    public void DisplayResults(){
-
-
-        Integer Band_Number_Concat = 0;
-        Integer Answer_Concat = 0;
-        Integer Multiplier = 0;
+        String ToleranceAns = Resistor_Numbers.get(3).toString();
+        String Multiplier = Resistor_Numbers.get(2).toString();
+        Double Band_Number_Concat;
+        Double DeciamalMultipliers;
+        Double temp;
+        String First_Second_Bands_Concat = "";
         Band_Number_Concat = concatenateDigits((Integer) Resistor_Numbers.get(0),(Integer) Resistor_Numbers.get(1));
 
-
-        // Check if the number is Black (which is no 0)
-       // then set answer to just concat band numbers
-       // Else add  zeros to the end.
-       if ((Integer)Resistor_Numbers.get(2) == 1) {
-            Answer_Concat = Band_Number_Concat;
+        if (Pattern.compile("^\\d+$").matcher(Multiplier).matches()){
+            if (Integer.parseInt(Multiplier) == 1){
+                Multiplier = "";
+            }else if(Integer.parseInt(Multiplier) == 9){
+                DeciamalMultipliers = Band_Number_Concat / 10;
+                First_Second_Bands_Concat = DeciamalMultipliers.toString();
+                Multiplier = "";
+            }else if(Integer.parseInt(Multiplier) == 99) {
+                DeciamalMultipliers = Band_Number_Concat / 100;
+                First_Second_Bands_Concat = DeciamalMultipliers.toString();
+                Multiplier = "";
+            }
         }
-       if((Integer) Resistor_Numbers.get(2) == 9){
-           Answer_Concat = Answer_Concat/10;
-       }
-       if((Integer) Resistor_Numbers.get(2) == 99){
-           Answer_Concat = Answer_Concat/100;
-       }
-
-//       switch ((Integer)Resistor_Numbers.get(2)){
-//           case 1:
-//               Answer_Concat = Band_Number_Concat;
-//               break;
-//           case 9:
-//               Answer_Concat = Answer_Concat/10;
-//               break;
-//           case 99:
-//               Answer_Concat = Answer_Concat/100;
-//               break;
-//       }
-
-        Multiplier = (Integer) Resistor_Numbers.get(2);
-        Answer_Concat = concatenateDigits((Integer) Band_Number_Concat, (Integer) Multiplier);
-
-       Log.e("","=====================");
-       Log.e("Band Numbers", Band_Number_Concat.toString());
-       Log.e("Multiplier",Multiplier.toString());
-       Log.e("Rounded Answer",Answer_Concat.toString());
-       Log.e("","=====================");
+            First_Second_Bands_Concat = String.format("%.0f", Band_Number_Concat);
 
 
-       tvResultContainer.setText(Answer_Concat.toString());
+
+        Log.e("","-------------------------");
+        Log.e("",First_Second_Bands_Concat);
+        Log.e("",Multiplier);
+        Log.e("",ToleranceAns);
+        Log.e("","-------------------------");
+
+       tvResultContainer.setText(First_Second_Bands_Concat + Multiplier+ " Ohms at ± "+ ToleranceAns + "%");
 
         textInputLayout.setVisibility(View.GONE);
         autoCompleteTextView.setVisibility(View.GONE);
         tvWhatColour.setVisibility(View.GONE);
-
         tvResultContainer.setVisibility(View.VISIBLE);
         tvYourResult.setVisibility(View.VISIBLE);
-       calcNumber();
    }
 
 
@@ -239,23 +231,23 @@ public class MainActivity extends AppCompatActivity {
         BandThree.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.emptyrectagle));
         BandFour.setBackground(ContextCompat.getDrawable(MainActivity.this, R.drawable.emptyrectagle));
 
-            textInputLayout.setVisibility(View.VISIBLE);
-            autoCompleteTextView.setVisibility  (View.VISIBLE);
-            tvWhatColour.setVisibility(View.VISIBLE);
+        textInputLayout.setVisibility(View.VISIBLE);
+        autoCompleteTextView.setVisibility  (View.VISIBLE);
+        tvWhatColour.setVisibility(View.VISIBLE);
 
-            tvResultContainer.setVisibility(View.GONE);
-            tvYourResult.setVisibility(View.GONE);
+        tvResultContainer.setVisibility(View.GONE);
+        tvYourResult.setVisibility(View.GONE);
+        ChooseColour();
     }
 
-    public void calcNumber(){
-        Log.e("",Resistor_Numbers.toString());
-    }
 
-    public static Integer concatenateDigits(int... digits) {
+
+    public static Double concatenateDigits(int... digits) {
         StringBuilder sb = new StringBuilder(digits.length);
         for (int digit : digits) {
             sb.append(digit);
         }
-        return Integer.parseInt(sb.toString());
+        return Double.parseDouble(sb.toString());
     }
+
 }
