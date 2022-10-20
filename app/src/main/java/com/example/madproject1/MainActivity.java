@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
         Log.e("",ToleranceAns);
         Log.e("","-------------------------");
 
-       tvResultContainer.setText(First_Second_Bands_Concat + Multiplier+ " Ohms at ± "+ ToleranceAns + "%");
+       tvResultContainer.setText(First_Second_Bands_Concat + Multiplier+ " Ω at ± "+ ToleranceAns + "%");
 
         textInputLayout.setVisibility(View.GONE);
         autoCompleteTextView.setVisibility(View.GONE);
@@ -221,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
     public void TryAgain(View view) {
         stage = 0;
         tvWhatColour.setText("What Colour is Band " + (stage + 1) + "?");
+        Resistor_Numbers = new ArrayList();
 
         tvColourOneTitle.setText("");
         tvColourTwoTitle.setText("");
